@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Статистика</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa; /* Светлый фон */
+            font-family: 'Arial', sans-serif; /* Удобочитаемый шрифт */
+        }
+        .card {
+            border-radius: 12px; /* Мягкие углы */
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1); /* Лёгкая тень */
+            background: linear-gradient(145deg, #ffffff, #e6e6e6); /* Лёгкий градиент */
+            padding: 1.5rem;
+        }
+        h1, h2 {
+            font-weight: bold;
+        }
+        ul {
+            list-style-type: none; /* Убираем стандартные маркеры */
+            padding: 0;
+        }
+        li {
+            font-size: 1.1rem; /* Чуть увеличенный шрифт для списка */
+            margin-bottom: 0.5rem; /* Расстояние между пунктами */
+        }
+        p {
+            font-size: 1.1rem; /* Легко читаемый текст */
+        }
+        .btn-outline-success {
+            padding: 0.5rem 1.5rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div class="container my-5">
+    <h1 class="text-center text-success mb-4">Статистика</h1>
+
+    <!-- Общая статистика -->
+    <div class="card shadow p-4 my-4">
+        <h2 class="text-success">Общая статистика</h2>
+        <p><strong>Средняя цена:</strong> <span th:text="${averagePrice}"></span> руб.</p>
+        <p><strong>Самый дорогой товар:</strong>
+            <span th:text="${maxPriceProduct?.name}"></span> -
+            <span th:text="${maxPriceProduct?.price}"></span> руб.
+        </p>
+        <p><strong>Самый дешевый товар:</strong>
+            <span th:text="${minPriceProduct?.name}"></span> -
+            <span th:text="${minPriceProduct?.price}"></span> руб.
+        </p>
+    </div>
+
+    <!-- Количество товаров по категориям -->
+    <div class="card shadow p-4 my-4">
+        <h2 class="text-success">Количество товаров по категориям</h2>
+        <ul>
+            <li th:each="entry : ${categoryCounts}">
+                <strong><span th:text="${entry.key}"></span></strong>:
+                <span th:text="${entry.value}"></span> шт.
+            </li>
+        </ul>
+    </div>
+
+    <!-- Кнопка возврата -->
+    <div class="text-center mt-4">
+        <a href="/products" class="btn btn-outline-success">Назад к продуктам</a>
+    </div>
+</div>
+<!-- Bootstrap Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

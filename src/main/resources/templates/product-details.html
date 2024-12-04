@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Детали о продукте</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa; /* Светлый фон */
+            font-family: 'Arial', sans-serif; /* Удобочитаемый шрифт */
+        }
+        .card {
+            border-radius: 12px; /* Мягкие углы */
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1); /* Лёгкая тень */
+            background: linear-gradient(145deg, #ffffff, #e6e6e6); /* Лёгкий градиент */
+            padding: 2rem;
+        }
+        h1 {
+            font-weight: bold;
+        }
+        p {
+            font-size: 1.1rem; /* Увеличенный шрифт для текста */
+        }
+        .btn-outline-success {
+            padding: 0.5rem 1.5rem;
+            font-weight: bold;
+        }
+        .product-image {
+            max-width: 250px; /* Ограничиваем ширину изображения */
+            height: auto; /* Сохраняем пропорции */
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Лёгкая тень для изображения */
+        }
+        .details-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 2rem; /* Расстояние между текстом и фото */
+            flex-wrap: wrap; /* Перенос на узких экранах */
+        }
+        .details-text {
+            flex: 1; /* Занимает доступное место */
+        }
+        .details-image {
+            text-align: center; /* Центрирование изображения */
+            flex-shrink: 0; /* Фиксированный размер для изображения */
+        }
+    </style>
+</head>
+<body>
+<div class="container my-5">
+    <div class="card shadow">
+        <h1 class="text-center text-success mb-4">Детали продукта</h1>
+
+        <!-- Контейнер для текста и фото -->
+        <div class="details-container">
+            <!-- Текстовая информация -->
+            <div class="details-text">
+                <div class="mb-3">
+                    <p><strong>Имя:</strong> <span th:text="${product.name}"></span></p>
+                </div>
+                <div class="mb-3">
+                    <p><strong>Категория:</strong> <span th:text="${product.category}"></span></p>
+                </div>
+                <div class="mb-3">
+                    <p><strong>Бренд:</strong> <span th:text="${product.brand}"></span></p>
+                </div>
+                <div class="mb-3">
+                    <p><strong>Цена:</strong> <span th:text="${product.price}"></span></p>
+                </div>
+                <div class="mb-3">
+                    <p><strong>Количество:</strong> <span th:text="${product.stock}"></span></p>
+                </div>
+                <div class="mb-3">
+                    <p><strong>Описание:</strong> <span th:text="${product.description}"></span></p>
+                </div>
+            </div>
+
+            <!-- Фото продукта -->
+            <div class="details-image">
+                <img th:src="@{/uploads/{imageName}(imageName=${product.imageName})}" alt="Product Image" class="product-image">
+            </div>
+        </div>
+
+        <!-- Кнопка возврата -->
+        <div class="text-center mt-4">
+            <a href="/products" class="btn btn-outline-success">Вернуться к продуктам</a>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
