@@ -52,60 +52,66 @@
     <h1 class="text-center text-success mb-4" th:text="${product.id == null ? 'Добавить новый товар' : 'Редактировать товар'}"></h1>
 
     <div class="card p-4">
+        <!-- Общие ошибки -->
+        <div th:if="${error}" class="alert alert-danger" role="alert">
+            <span th:text="${error}"></span>
+        </div>
+
         <form th:object="${product}" th:action="@{/products/admin/save}" method="post" enctype="multipart/form-data">
             <!-- Скрытое поле для ID -->
             <input type="hidden" th:field="*{id}">
 
+            <!-- Поля формы -->
             <!-- Название -->
             <div class="mb-3">
                 <label for="name" class="form-label">Название товара:</label>
-                <input type="text" id="name" th:field="*{name}" class="form-control" placeholder="Введите название товара">
-                <div th:if="${#fields.hasErrors('name')}" class="text-danger" th:errors="*{name}"></div>
+                <input type="text" id="name" th:field="*{name}" class="form-control" placeholder="Введите название товара" required>
+                <div th:if="${nameError}" class="text-danger" th:text="${nameError}"></div>
             </div>
 
             <!-- Категория -->
             <div class="mb-3">
                 <label for="category" class="form-label">Категория:</label>
-                <select id="category" th:field="*{category}" class="form-select">
+                <select id="category" th:field="*{category}" class="form-select" required>
                     <option value="">Выберите категорию</option>
                     <option th:each="cat : ${categories}" th:value="${cat}" th:text="${cat}" th:selected="${cat == product.category}"></option>
                 </select>
-                <div th:if="${#fields.hasErrors('category')}" class="text-danger" th:errors="*{category}"></div>
+                <div th:if="${categoryError}" class="text-danger" th:text="${categoryError}"></div>
             </div>
 
             <!-- Бренд -->
             <div class="mb-3">
                 <label for="brand" class="form-label">Бренд:</label>
-                <input type="text" id="brand" th:field="*{brand}" class="form-control" placeholder="Введите бренд">
-                <div th:if="${#fields.hasErrors('brand')}" class="text-danger" th:errors="*{brand}"></div>
+                <input type="text" id="brand" th:field="*{brand}" class="form-control" placeholder="Введите бренд" required>
+                <div th:if="${brandError}" class="text-danger" th:text="${brandError}"></div>
             </div>
 
             <!-- Цена -->
             <div class="mb-3">
                 <label for="price" class="form-label">Цена:</label>
-                <input type="number" id="price" th:field="*{price}" class="form-control" placeholder="Введите цену" step="0.01">
-                <div th:if="${#fields.hasErrors('price')}" class="text-danger" th:errors="*{price}"></div>
+                <input type="number" id="price" th:field="*{price}" class="form-control" placeholder="Введите цену" step="0.01" required min="0.01">
+                <div th:if="${priceError}" class="text-danger" th:text="${priceError}"></div>
             </div>
 
             <!-- Количество на складе -->
             <div class="mb-3">
                 <label for="stock" class="form-label">Количество на складе:</label>
-                <input type="number" id="stock" th:field="*{stock}" class="form-control" placeholder="Введите количество">
-                <div th:if="${#fields.hasErrors('stock')}" class="text-danger" th:errors="*{stock}"></div>
+                <input type="number" id="stock" th:field="*{stock}" class="form-control" placeholder="Введите количество" required min="0">
+                <div th:if="${stockError}" class="text-danger" th:text="${stockError}"></div>
             </div>
 
             <!-- Описание -->
             <div class="mb-3">
                 <label for="description" class="form-label">Описание:</label>
                 <textarea id="description" th:field="*{description}" class="form-control" rows="3" placeholder="Введите описание"></textarea>
-                <div th:if="${#fields.hasErrors('description')}" class="text-danger" th:errors="*{description}"></div>
+                <div th:if="${descriptionError}" class="text-danger" th:text="${descriptionError}"></div>
             </div>
 
             <!-- Загрузка изображения -->
             <div class="mb-3">
                 <label for="image" class="form-label">Изображение товара:</label>
                 <input type="file" id="image" name="image" class="form-control">
-                <div th:if="${error}" class="text-danger" th:text="${error}"></div>
+                <div th:if="${imageError}" class="text-danger" th:text="${imageError}"></div>
             </div>
 
             <!-- Предварительный просмотр изображения -->
@@ -116,14 +122,59 @@
 
             <!-- Кнопки -->
             <div class="d-flex justify-content-between">
-                <button type="submit" class="btn btn-success">Сохранить</button>
+                <button type="submit" class="btn btn-success" th:disabled="${#fields.hasErrors()}">Сохранить</button>
                 <a th:href="@{/products/admin}" class="btn btn-secondary">Отменить</a>
             </div>
         </form>
     </div>
 </div>
+<!-- Модальное окно -->
+<div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-danger" id="errorModalLabel">Ошибка</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                <p id="errorMessage" class="text-danger"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-<!-- Bootstrap Bundle with Popper -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function showError(message) {
+        document.getElementById('errorMessage').innerText = message;
+        const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+        errorModal.show();
+    }
+
+    document.querySelector('form').addEventListener('submit', function (event) {
+        event.preventDefault();
+        const form = event.target;
+
+        fetch(form.action, {
+            method: form.method,
+            body: new FormData(form)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => { throw new Error(text); });
+                }
+                return response.text();
+            })
+            .then(() => {
+                window.location.href = '/products/admin'; // Перенаправление после успешного сохранения
+            })
+            .catch(error => {
+                showError(error.message);
+            });
+    });
+</script>
 </body>
 </html>

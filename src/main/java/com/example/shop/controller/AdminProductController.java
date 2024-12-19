@@ -9,8 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -58,7 +58,7 @@ public class AdminProductController {
     @GetMapping("/add")
     public String addProductForm(Model model) {
         model.addAttribute("product", new Product());
-        model.addAttribute("categories", CATEGORIES); // Добавляем список категорий
+        model.addAttribute("categories", CATEGORIES);
         return "admin-product-form";
     }
 
@@ -74,7 +74,6 @@ public class AdminProductController {
         return "admin-product-form";
     }
 
-
     // Сохранение продукта
     @PostMapping("/save")
     public String saveProduct(
@@ -85,11 +84,44 @@ public class AdminProductController {
 
         if (result.hasErrors()) {
             model.addAttribute("categories", CATEGORIES);
+
+            // Добавление пользовательских ошибок для отображения
+            result.getFieldErrors().forEach(error -> {
+                switch (error.getField()) {
+                    case "price":
+                        model.addAttribute("priceError", "Цена должна быть больше нуля и заполнена корректно.");
+                        break;
+                    case "name":
+                        model.addAttribute("nameError", "Название товара обязательно.");
+                        break;
+                    case "category":
+                        model.addAttribute("categoryError", "Необходимо выбрать категорию.");
+                        break;
+                    case "brand":
+                        model.addAttribute("brandError", "Необходимо указать бренд.");
+                        break;
+                    case "description":
+                        model.addAttribute("descriptionError", "Описание слишком длинное или отсутствует.");
+                        break;
+                }
+            });
+
             return "admin-product-form";
         }
 
         try {
             if (!image.isEmpty()) {
+                String contentType = image.getContentType();
+                if (contentType == null || !(contentType.equals("image/jpeg") || contentType.equals("image/png"))) {
+                    model.addAttribute("error", "Неверный формат изображения. Поддерживаются только JPG и PNG.");
+                    return "admin-product-form";
+                }
+
+                if (image.getSize() > 5 * 1024 * 1024) { // 5MB
+                    model.addAttribute("error", "Размер изображения не должен превышать 5MB.");
+                    return "admin-product-form";
+                }
+
                 String imageName = System.currentTimeMillis() + "_" + image.getOriginalFilename();
                 Path imagePath = Paths.get("uploads", imageName);
                 Files.createDirectories(imagePath.getParent());
@@ -97,37 +129,14 @@ public class AdminProductController {
                 product.setImageName(imageName);
             }
 
-            // Обновление или создание нового продукта
-            if (product.getId() != null) {
-                // Проверяем, существует ли продукт с таким ID
-                Product existingProduct = productService.findById(product.getId());
-                if (existingProduct != null) {
-                    // Обновляем существующий продукт
-                    existingProduct.setName(product.getName());
-                    existingProduct.setCategory(product.getCategory());
-                    existingProduct.setDescription(product.getDescription());
-                    existingProduct.setStock(product.getStock());
-                    existingProduct.setPrice(product.getPrice());
-                    existingProduct.setBrand(product.getBrand());
-                    existingProduct.setImageName(product.getImageName());
-                    productService.save(existingProduct);
-                } else {
-                    // Если продукта с таким ID нет, создаём новый
-                    productService.save(product);
-                }
-            } else {
-                // Если ID отсутствует, создаём новый продукт
-                productService.save(product);
-            }
+            productService.save(product);
         } catch (IOException e) {
-            e.printStackTrace();
-            model.addAttribute("error", "Failed to upload image.");
+            model.addAttribute("error", "Ошибка при загрузке изображения. Попробуйте ещё раз.");
             return "admin-product-form";
         }
 
         return "redirect:/products/admin";
     }
-
 
     // Удаление продукта
     @GetMapping("/delete/{id}")

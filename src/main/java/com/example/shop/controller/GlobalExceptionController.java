@@ -1,6 +1,6 @@
 package com.example.shop.controller;
 
-import org.springframework.ui.Model;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -8,14 +8,12 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class GlobalExceptionController {
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public String handleIllegalArgumentException(IllegalArgumentException ex, Model model) {
-        model.addAttribute("error", ex.getMessage());
-        return "error";
+    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException ex) {
+        return ResponseEntity.badRequest().body(ex.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
-    public String handleGeneralException(Exception ex, Model model) {
-        model.addAttribute("error", "Произошла ошибка: " + ex.getMessage());
-        return "error";
+    public ResponseEntity<String> handleGeneralException(Exception ex) {
+        return ResponseEntity.badRequest().body("Произошла ошибка: " + ex.getMessage());
     }
 }
